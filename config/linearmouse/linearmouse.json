@@ -1,0 +1,23 @@
+{
+  "$schema" : "https:\/\/schema.linearmouse.app\/0.10.4",
+  "schemes" : [
+    {
+      "buttons" : {
+        "universalBackForward" : true
+      },
+      "if" : {
+        "device" : {
+          "category" : "mouse",
+          "productID" : "0xa6",
+          "productName" : "Razer Viper V2 Pro",
+          "serialNumber" : "000000000000",
+          "vendorID" : "0x1532"
+        }
+      },
+      "pointer" : {
+        "acceleration" : 0.8,
+        "disableAcceleration" : true
+      }
+    }
+  ]
+}

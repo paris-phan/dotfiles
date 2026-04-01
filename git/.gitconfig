@@ -1,38 +1,8 @@
-[user]
-	name = Paris Phan
-	email = paris.hphan@gmail.com
-
-[init]
-	defaultBranch = main
-
-[core]
-	editor = code --wait
-	autocrlf = input
-	excludesfile = ~/.gitignore_global
-
-[pull]
-	rebase = true
-
-[push]
-	autoSetupRemote = true
-	default = current
-
-[alias]
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-	unstage = reset HEAD --
-	last = log -1 HEAD
-	graph = log --oneline --graph --decorate --all
-	amend = commit --amend --no-edit
-	wip = !git add -A && git commit -m 'wip'
-
-[credential]
-	helper = osxkeychain
-
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[user]
+	name = Paris Phan
+	email = 37759794+paris-phan@users.noreply.github.com

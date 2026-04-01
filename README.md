@@ -1,68 +1,86 @@
 # dotfiles
 
-Mac development environment — M4 Mac Mini ↔ M1 Pro MacBook Pro.
+Mac development environment for M4 Mac Mini.
 
 ## Setup from Scratch
 
-### On a configured Mac (extract current state):
 ```bash
-git clone <this-repo> ~/dotfiles   # or mkdir ~/dotfiles && git init
-bash ~/dotfiles/scripts/extract.sh  # captures brew, vscode, shell, conda, etc.
-# Review Brewfile.generated → rename to Brewfile
-git add -A && git commit -m "initial" && git push
-```
-
-### On a fresh Mac (bootstrap):
-```bash
+# 1. Install Xcode CLI tools and Homebrew
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# 2. Clone and bootstrap
 brew install git
-git clone <this-repo> ~/dotfiles
-bash ~/dotfiles/install.sh
+git clone <this-repo> ~/Github/dotfiles
+bash ~/Github/dotfiles/install.sh
 ```
+
+Then complete the steps in [manual-steps.md](manual-steps.md).
 
 ## Keeping Machines in Sync
 
 ```bash
-# After changing anything on either machine:
-cd ~/dotfiles && git add -A && git commit -m "update" && git push
+# After changing anything:
+cd ~/Github/dotfiles
+bash extract.sh          # captures current state
+git add -A && git commit -m "update" && git push
 
 # On the other machine:
-cd ~/dotfiles && git pull
-brew bundle --file=~/dotfiles/Brewfile   # if Brewfile changed
+cd ~/Github/dotfiles && git pull
+brew bundle --file=Brewfile   # if Brewfile changed
 ```
 
 ## Structure
 
 ```
 dotfiles/
-├── Brewfile                # brew formulae, casks, Mac App Store apps
-├── install.sh              # bootstrap script for fresh Mac
-├── .zshrc                  # shell config, aliases, PATH
-├── .zprofile               # login shell env
-├── .gitconfig              # git settings + aliases
-├── .gitignore_global       # system-wide gitignore
-├── .condarc                # conda settings (if extracted)
-├── ssh_config              # SSH host shortcuts (no keys!)
+├── Brewfile                        # Homebrew formulae and casks
+├── install.sh                      # Bootstrap a fresh Mac
+├── extract.sh                      # Capture current Mac state
+├── defaults.sh                     # macOS system preferences
+├── manual-steps.md                 # Post-bootstrap checklist
+├── shell/
+│   ├── .zshrc                      # Shell config, aliases, functions
+│   └── .zprofile                   # Login shell (brew shellenv)
+├── git/
+│   ├── .gitconfig                  # Git user + LFS
+│   └── .gitignore_global           # System-wide gitignore
+├── ssh/
+│   └── config                      # SSH host shortcuts (no keys)
 ├── vscode/
-│   ├── settings.json
-│   ├── keybindings.json
-│   └── extensions.txt      # one extension ID per line
-├── macos/
-│   └── defaults.sh         # macOS system preferences
-├── conda/
-│   └── *.yml               # exported conda environments
-├── scripts/
-│   └── extract.sh          # capture current Mac state
-└── README.md
+│   ├── settings.json               # Editor settings
+│   ├── keybindings.json            # Custom keybindings
+│   └── extensions.txt              # Extension IDs
+├── config/
+│   ├── linearmouse/linearmouse.json # Mouse config (Razer Viper V2 Pro)
+│   ├── gh/config.yml               # GitHub CLI preferences
+│   └── claude.json                 # Claude Code config (sanitized)
+├── launchagents/
+│   └── com.lwouis.alt-tab-macos.plist
+└── conda/
+    └── *.yml                       # Exported conda environments
 ```
 
-## Manual Steps After Bootstrap
+## What's Automated vs Manual
 
-1. iCloud sign-in + sync
-2. Internet accounts (Gmail ×2, UVA, GreekCore, Chancellor Street)
-3. CLI auth: `gh auth login`, `gcloud auth login`, `claude auth`
-4. Direct downloads: Raycast, Bartender 6, BetterDisplay, Docker Desktop, BasicTeX
-5. App Store: Xcode, Office, Logic Pro, MainStage, Final Cut Pro, GoodNotes, Things 3
-6. Sign into all apps
+| Automated by install.sh | Manual (see manual-steps.md) |
+|---|---|
+| Homebrew packages + casks | iCloud sign-in |
+| Shell config (.zshrc, .zprofile) | Internet accounts |
+| Git config | CLI auth (gh, gcloud, claude) |
+| SSH config | App sign-ins |
+| VS Code settings + extensions | Antigravity, Texifier |
+| App configs (linearmouse, gh) | Raycast cloud sync |
+| macOS defaults (dock, finder, etc.) | |
+| LaunchAgents | |
+| Claude Code CLI + config | |
+| Conda environments | |
+
+## Not Captured (by design)
+
+- SSH private keys (generated fresh per machine)
+- Auth tokens (gh, gcloud, Claude, Raycast)
+- Keychain data (syncs via iCloud)
+- macOS notification preferences
+- TCC/Privacy permissions (granted per-app on first use)

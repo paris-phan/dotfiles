@@ -8,6 +8,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # --- PATH --------------------------------------------------------------------
 export PATH="$HOME/.local/bin:$PATH"                          # Claude Code, pipx, etc.
 export PATH="/opt/homebrew/share/google-cloud-sdk/bin:$PATH"  # gcloud CLI
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"        # Antigravity
 
 # --- Editor ------------------------------------------------------------------
 export EDITOR="code --wait"

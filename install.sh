@@ -1,20 +1,32 @@
 #!/bin/bash
 # =============================================================================
-# install.sh — Bootstrap a fresh Mac to match the Mac Mini
-# Usage: git clone <repo> ~/dotfiles && bash ~/dotfiles/install.sh
+# install.sh — Bootstrap a fresh Mac
+# Usage: git clone <repo> ~/Github/dotfiles && bash ~/Github/dotfiles/install.sh
 # =============================================================================
 set -e
 
-DOTFILES_DIR="$HOME/dotfiles"
+# Auto-detect dotfiles directory (where this script lives)
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
 step() { echo -e "\n${BLUE}==>${NC} ${GREEN}$1${NC}"; }
-warn() { echo -e "  ${YELLOW}⚠ $1${NC}"; }
+warn() { echo -e "  ${YELLOW}! $1${NC}"; }
 
-# ─── Xcode CLI Tools ────────────────────────────────────────────────────────
+link_file() {
+  local src="$1" dest="$2"
+  if [ -e "$dest" ] && [ ! -L "$dest" ]; then
+    mv "$dest" "${dest}.backup.$(date +%s)"
+    warn "Backed up existing $(basename "$dest")"
+  fi
+  ln -sf "$src" "$dest"
+  echo "  $(basename "$src") -> $dest"
+}
+
+# ─── 1. Xcode CLI Tools ────────────────────────────────────────────────────
 step "Xcode Command Line Tools..."
 if xcode-select -p &>/dev/null; then
   echo "  Already installed."
@@ -24,7 +36,7 @@ else
   read -r
 fi
 
-# ─── Homebrew ────────────────────────────────────────────────────────────────
+# ─── 2. Homebrew ────────────────────────────────────────────────────────────
 step "Homebrew..."
 if command -v brew &>/dev/null; then
   echo "  Already installed."
@@ -33,7 +45,7 @@ else
 fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# ─── Brew Bundle ─────────────────────────────────────────────────────────────
+# ─── 3. Brew Bundle ─────────────────────────────────────────────────────────
 step "Installing from Brewfile..."
 if [ -f "$DOTFILES_DIR/Brewfile" ]; then
   brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock
@@ -41,73 +53,108 @@ else
   warn "No Brewfile found. Skipping."
 fi
 
-# ─── Conda init ──────────────────────────────────────────────────────────────
+# ─── 4. Conda init ──────────────────────────────────────────────────────────
 step "Initializing Conda..."
-if command -v conda &>/dev/null; then
+CONDA_SH="/opt/homebrew/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+if [ -f "$CONDA_SH" ]; then
+  source "$CONDA_SH"
   conda init "$(basename "${SHELL}")"
-  echo "  Conda initialized for $(basename "${SHELL}")"
+  echo "  Conda initialized."
 else
-  warn "Conda not found. Install miniconda first."
+  warn "Conda not found. Miniconda may not have installed yet."
 fi
 
-# ─── Symlinks ────────────────────────────────────────────────────────────────
-step "Symlinking dotfiles..."
+# ─── 5. Shell config symlinks ──────────────────────────────────────────────
+step "Symlinking shell configs..."
+link_file "$DOTFILES_DIR/shell/.zshrc" "$HOME/.zshrc"
+link_file "$DOTFILES_DIR/shell/.zprofile" "$HOME/.zprofile"
 
-link_file() {
-  local src="$1" dest="$2"
-  if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-    mv "$dest" "${dest}.backup.$(date +%s)"
-    warn "Backed up existing $(basename "$dest")"
-  fi
-  ln -sf "$src" "$dest"
-  echo "  $(basename "$src") → $dest"
-}
+# ─── 6. Git config symlinks ────────────────────────────────────────────────
+step "Symlinking git configs..."
+link_file "$DOTFILES_DIR/git/.gitconfig" "$HOME/.gitconfig"
+link_file "$DOTFILES_DIR/git/.gitignore_global" "$HOME/.gitignore_global"
 
-link_file "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
-link_file "$DOTFILES_DIR/.zprofile" "$HOME/.zprofile"
-link_file "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
-link_file "$DOTFILES_DIR/.gitignore_global" "$HOME/.gitignore_global"
-[ -f "$DOTFILES_DIR/.condarc" ] && link_file "$DOTFILES_DIR/.condarc" "$HOME/.condarc"
-[ -f "$DOTFILES_DIR/.npmrc" ] && link_file "$DOTFILES_DIR/.npmrc" "$HOME/.npmrc"
-
-# SSH
+# ─── 7. SSH config ─────────────────────────────────────────────────────────
+step "SSH config..."
 mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
-link_file "$DOTFILES_DIR/ssh_config" "$HOME/.ssh/config"
-
-# Starship
-if [ -f "$DOTFILES_DIR/starship.toml" ]; then
-  mkdir -p "$HOME/.config"
-  link_file "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
+if [ -f "$DOTFILES_DIR/ssh/config" ]; then
+  link_file "$DOTFILES_DIR/ssh/config" "$HOME/.ssh/config"
 fi
 
-# ─── VS Code ────────────────────────────────────────────────────────────────
+# ─── 8. VS Code ────────────────────────────────────────────────────────────
 step "VS Code setup..."
 VSCODE_DIR="$HOME/Library/Application Support/Code/User"
 mkdir -p "$VSCODE_DIR"
+
 [ -f "$DOTFILES_DIR/vscode/settings.json" ] && link_file "$DOTFILES_DIR/vscode/settings.json" "$VSCODE_DIR/settings.json"
 [ -f "$DOTFILES_DIR/vscode/keybindings.json" ] && link_file "$DOTFILES_DIR/vscode/keybindings.json" "$VSCODE_DIR/keybindings.json"
 
-if command -v code &>/dev/null && [ -f "$DOTFILES_DIR/vscode/extensions.txt" ]; then
+if [ -d "$DOTFILES_DIR/vscode/snippets" ]; then
+  ln -sf "$DOTFILES_DIR/vscode/snippets" "$VSCODE_DIR/snippets"
+  echo "  snippets/ -> $VSCODE_DIR/snippets"
+fi
+
+# Install extensions
+CODE_CMD=""
+if command -v code &>/dev/null; then
+  CODE_CMD="code"
+elif [ -x "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" ]; then
+  CODE_CMD="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+fi
+
+if [ -n "$CODE_CMD" ] && [ -f "$DOTFILES_DIR/vscode/extensions.txt" ]; then
   step "Installing VS Code extensions..."
   grep -v '^#' "$DOTFILES_DIR/vscode/extensions.txt" | grep -v '^$' | while read -r ext; do
-    code --install-extension "$ext" --force 2>/dev/null || warn "Failed: $ext"
+    "$CODE_CMD" --install-extension "$ext" --force 2>/dev/null || warn "Failed: $ext"
   done
 fi
 
-# ─── Claude Code ─────────────────────────────────────────────────────────────
-step "Installing Claude Code..."
+# ─── 9. App configs ────────────────────────────────────────────────────────
+step "Restoring app configs..."
+
+# LinearMouse
+if [ -f "$DOTFILES_DIR/config/linearmouse/linearmouse.json" ]; then
+  mkdir -p "$HOME/.config/linearmouse"
+  link_file "$DOTFILES_DIR/config/linearmouse/linearmouse.json" "$HOME/.config/linearmouse/linearmouse.json"
+fi
+
+# GitHub CLI
+if [ -f "$DOTFILES_DIR/config/gh/config.yml" ]; then
+  mkdir -p "$HOME/.config/gh"
+  link_file "$DOTFILES_DIR/config/gh/config.yml" "$HOME/.config/gh/config.yml"
+fi
+
+# Claude Code config (copy, not symlink — Claude modifies this at runtime)
+if [ -f "$DOTFILES_DIR/config/claude.json" ]; then
+  cp "$DOTFILES_DIR/config/claude.json" "$HOME/.claude.json"
+  echo "  claude.json -> ~/.claude.json (copied)"
+fi
+
+# ─── 10. LaunchAgents ──────────────────────────────────────────────────────
+step "Restoring LaunchAgents..."
+mkdir -p "$HOME/Library/LaunchAgents"
+for plist in "$DOTFILES_DIR/launchagents"/*.plist; do
+  [ -f "$plist" ] || continue
+  name="$(basename "$plist")"
+  cp "$plist" "$HOME/Library/LaunchAgents/$name"
+  launchctl load "$HOME/Library/LaunchAgents/$name" 2>/dev/null || true
+  echo "  Loaded $name"
+done
+
+# ─── 11. macOS Defaults ────────────────────────────────────────────────────
+step "Applying macOS defaults..."
+source "$DOTFILES_DIR/defaults.sh"
+
+# ─── 12. Claude Code CLI ───────────────────────────────────────────────────
+step "Claude Code..."
 if ! command -v claude &>/dev/null; then
   curl -fsSL https://claude.ai/install.sh | bash
-  echo "  Installed Claude Code"
+  echo "  Installed Claude Code CLI."
 else
   echo "  Already installed."
 fi
 
-# ─── PATH setup ──────────────────────────────────────────────────────────────
-# Already handled by .zshrc symlink, but ensure .local/bin exists
-mkdir -p "$HOME/.local/bin"
-
-# ─── SSH Key ─────────────────────────────────────────────────────────────────
+# ─── 13. SSH Key ───────────────────────────────────────────────────────────
 step "SSH key..."
 if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
   echo -n "  Email for SSH key: "
@@ -119,15 +166,15 @@ if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
   echo "  Public key (add to GitHub):"
   cat "$HOME/.ssh/id_ed25519.pub"
   echo ""
-  echo "  Or just run: gh auth login"
 else
   echo "  Already exists."
 fi
 
-# ─── Conda Environments ─────────────────────────────────────────────────────
+# ─── 14. Conda Environments ────────────────────────────────────────────────
 step "Restoring Conda environments..."
 if [ -d "$DOTFILES_DIR/conda" ] && command -v conda &>/dev/null; then
   for yml in "$DOTFILES_DIR/conda"/*.yml; do
+    [ -f "$yml" ] || continue
     env_name=$(basename "$yml" .yml)
     if ! conda env list | grep -q "^${env_name} "; then
       conda env create -f "$yml" && echo "  Created env: $env_name"
@@ -136,46 +183,19 @@ if [ -d "$DOTFILES_DIR/conda" ] && command -v conda &>/dev/null; then
     fi
   done
 else
-  info "  No conda envs to restore."
+  echo "  No conda envs to restore."
 fi
 
-# ─── macOS Defaults ──────────────────────────────────────────────────────────
-step "Applying macOS defaults..."
-source "$DOTFILES_DIR/macos/defaults.sh"
+# ─── 15. Ensure directories exist ──────────────────────────────────────────
+mkdir -p "$HOME/.local/bin"
+mkdir -p "$HOME/Screenshots"
 
-# ─── Direct Downloads Reminder ───────────────────────────────────────────────
+# ─── Done ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}  Bootstrap complete!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo ""
-echo "  Restart your terminal, then:"
-echo ""
-echo "  1. Sign into iCloud and sync everything"
-echo "  2. Add internet accounts:"
-echo "     - parisphan1234@gmail"
-echo "     - paris.hphan@gmail"
-echo "     - auj4yx@virginia"
-echo "     - paris@greekcore"
-echo "     - paris@chancellor-street"
-echo ""
-echo "  3. Authenticate CLIs:"
-echo "     gh auth login"
-echo "     gcloud auth login"
-echo "     claude auth"
-echo ""
-echo "  4. Manual downloads needed:"
-echo "     - Raycast          https://raycast.com"
-echo "     - Bartender 6      https://macbartender.com"
-echo "     - BetterDisplay     https://betterdisplay.pro"
-echo "     - Docker Desktop   https://docker.com/products/docker-desktop"
-echo "     - BasicTeX         https://tug.org/mactex/morepackages.html"
-echo "     - Antigravity      (check original source)"
-echo "     - Texifier         (App Store or direct)"
-echo ""
-echo "  5. Mac App Store apps (installed via Brewfile if mas IDs are correct):"
-echo "     - Xcode, Microsoft Office, Logic Pro, MainStage"
-echo "     - Final Cut Pro, GoodNotes, Things 3, Texifier"
-echo ""
-echo "  6. Sign into apps: Arc, Chrome, Notion, Slack, Discord, Spotify, etc."
+echo "  Restart your terminal, then complete the manual steps:"
+echo "  See: $DOTFILES_DIR/manual-steps.md"
 echo ""

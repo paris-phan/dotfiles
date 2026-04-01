@@ -1,10 +1,10 @@
-# Don't commit these
+# Sensitive files
+**/hosts.yml
+**/credentials
+**/.credentials
+
+# Generated / ephemeral
 *.backup.*
-path-snapshot.txt
-applications.txt
-launchagents.txt
-npm-globals.txt
-conda-envs.txt
 Brewfile.generated
 Brewfile.lock.json
 .DS_Store
