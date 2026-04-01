@@ -75,8 +75,8 @@ defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
-# Safari: enable developer menu
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
+# Safari: enable developer menu (may fail on sandboxed Safari)
+defaults write com.apple.Safari IncludeDevelopMenu -bool true 2>/dev/null || true
 
 # TextEdit: plain text by default
 defaults write com.apple.TextEdit RichText -int 0
