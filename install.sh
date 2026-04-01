@@ -48,7 +48,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # ─── 3. Brew Bundle ─────────────────────────────────────────────────────────
 step "Installing from Brewfile..."
 if [ -f "$DOTFILES_DIR/Brewfile" ]; then
-  brew bundle --file="$DOTFILES_DIR/Brewfile" --no-lock
+  brew bundle --file="$DOTFILES_DIR/Brewfile"
 else
   warn "No Brewfile found. Skipping."
 fi

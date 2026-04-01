@@ -22,6 +22,7 @@ claude auth
 ## 4. Manual Downloads
 - **Antigravity** — not in Homebrew
 - **Texifier** — App Store
+- **Toggl Track** — https://toggl.com/track/toggl-desktop/
 
 ## 5. App Sign-ins
 - Google Chrome

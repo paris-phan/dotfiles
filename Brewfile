@@ -28,5 +28,4 @@ cask "notion-calendar"      # Calendar
 cask "raycast"              # Launcher
 cask "slack"                # Communication
 cask "spotify"              # Music
-cask "toggl-track"          # Time tracking
 cask "visual-studio-code"   # Code editor
