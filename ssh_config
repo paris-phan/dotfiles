@@ -1,0 +1,24 @@
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+
+Host uva
+  HostName portal.cs.virginia.edu
+  User auj4yx
+  IdentityFile ~/.ssh/id_ed25519
+
+# Mac Mini (update IP for MacBook to SSH into Mini)
+Host mini
+  HostName 192.168.1.XXX
+  User paris
+  IdentityFile ~/.ssh/id_ed25519
+  LocalForward 8888 localhost:8888
+  LocalForward 3000 localhost:3000
