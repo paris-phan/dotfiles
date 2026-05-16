@@ -31,6 +31,17 @@ step "Copying shell configs..."
 [ -f "$HOME/.zshrc" ] && cp "$HOME/.zshrc" "$DOTFILES_DIR/shell/.zshrc" && info "Copied .zshrc"
 [ -f "$HOME/.zprofile" ] && cp "$HOME/.zprofile" "$DOTFILES_DIR/shell/.zprofile" && info "Copied .zprofile"
 
+# Fish shell — only user-authored files; fisher manages functions/completions/conf.d
+if [ -d "$HOME/.config/fish" ]; then
+  mkdir -p "$DOTFILES_DIR/shell/fish/themes"
+  [ -f "$HOME/.config/fish/config.fish" ]  && cp "$HOME/.config/fish/config.fish"  "$DOTFILES_DIR/shell/fish/config.fish"  && info "Copied config.fish"
+  [ -f "$HOME/.config/fish/fish_plugins" ] && cp "$HOME/.config/fish/fish_plugins" "$DOTFILES_DIR/shell/fish/fish_plugins" && info "Copied fish_plugins"
+  if [ -d "$HOME/.config/fish/themes" ] && [ -n "$(ls -A "$HOME/.config/fish/themes" 2>/dev/null)" ]; then
+    rsync -a --delete "$HOME/.config/fish/themes/" "$DOTFILES_DIR/shell/fish/themes/"
+    info "Copied fish themes/"
+  fi
+fi
+
 # ─── 3. Git configs ─────────────────────────────────────────────────────────
 step "Copying git configs..."
 [ -f "$HOME/.gitconfig" ] && cp "$HOME/.gitconfig" "$DOTFILES_DIR/git/.gitconfig" && info "Copied .gitconfig"

@@ -47,8 +47,15 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # ─── 3. Brew Bundle ─────────────────────────────────────────────────────────
 step "Installing from Brewfile..."
+BREW_BUNDLE_OK=1
 if [ -f "$DOTFILES_DIR/Brewfile" ]; then
-  brew bundle --file="$DOTFILES_DIR/Brewfile"
+  # Don't let a single cask failure abort the whole bootstrap — record it and
+  # continue so steps 4-15 still run. User can re-run install.sh to retry.
+  if ! brew bundle --file="$DOTFILES_DIR/Brewfile"; then
+    BREW_BUNDLE_OK=0
+    warn "brew bundle reported failures — continuing with the rest of install.sh."
+    warn "Re-run 'brew bundle --file=$DOTFILES_DIR/Brewfile' after resolving the error above."
+  fi
 else
   warn "No Brewfile found. Skipping."
 fi
@@ -68,6 +75,76 @@ fi
 step "Symlinking shell configs..."
 link_file "$DOTFILES_DIR/shell/.zshrc" "$HOME/.zshrc"
 link_file "$DOTFILES_DIR/shell/.zprofile" "$HOME/.zprofile"
+
+# ─── 5b. Fish shell ────────────────────────────────────────────────────────
+step "Setting up fish shell..."
+if [ -d "$DOTFILES_DIR/shell/fish" ]; then
+  mkdir -p "$HOME/.config/fish"
+
+  # Symlink user-authored files individually. We deliberately do NOT symlink
+  # ~/.config/fish itself, because fisher writes plugin files into
+  # functions/, completions/, and conf.d/ at runtime — those writes would
+  # land back in the repo if the parent dir were a symlink.
+  [ -f "$DOTFILES_DIR/shell/fish/config.fish" ] && \
+    link_file "$DOTFILES_DIR/shell/fish/config.fish"  "$HOME/.config/fish/config.fish"
+  [ -f "$DOTFILES_DIR/shell/fish/fish_plugins" ] && \
+    link_file "$DOTFILES_DIR/shell/fish/fish_plugins" "$HOME/.config/fish/fish_plugins"
+  if [ -d "$DOTFILES_DIR/shell/fish/themes" ]; then
+    mkdir -p "$HOME/.config/fish/themes"
+    for theme in "$DOTFILES_DIR/shell/fish/themes"/*; do
+      [ -f "$theme" ] && link_file "$theme" "$HOME/.config/fish/themes/$(basename "$theme")"
+    done
+  fi
+
+  FISH_BIN="$(command -v fish || true)"
+  FISH_DEFAULT_OK=1
+  if [ -n "$FISH_BIN" ]; then
+    # Compare against the OS's recorded login shell, not $SHELL — $SHELL only
+    # reflects the parent process and won't update mid-script after chsh.
+    CURRENT_LOGIN_SHELL="$(dscl . -read "$HOME" UserShell 2>/dev/null | awk '{print $2}')"
+
+    if ! grep -qx "$FISH_BIN" /etc/shells; then
+      echo "  Adding $FISH_BIN to /etc/shells (sudo required)"
+      if ! echo "$FISH_BIN" | sudo tee -a /etc/shells >/dev/null; then
+        warn "sudo failed — couldn't register fish in /etc/shells."
+        FISH_DEFAULT_OK=0
+      fi
+    fi
+
+    if [ "$CURRENT_LOGIN_SHELL" != "$FISH_BIN" ] && [ "$FISH_DEFAULT_OK" = "1" ]; then
+      echo "  Changing default login shell to fish (you'll be prompted for your password)"
+      if ! chsh -s "$FISH_BIN"; then
+        warn "chsh failed. Run manually:  chsh -s $FISH_BIN"
+        FISH_DEFAULT_OK=0
+      fi
+    elif [ "$CURRENT_LOGIN_SHELL" = "$FISH_BIN" ]; then
+      echo "  Default login shell already fish."
+    fi
+
+    if [ -f "$DOTFILES_DIR/shell/fish/fish_plugins" ]; then
+      echo "  Installing fisher + plugins from fish_plugins"
+      if ! "$FISH_BIN" -c '
+        if not functions -q fisher
+          curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+          and fisher install jorgebucaran/fisher
+        end
+        fisher update
+      '; then
+        warn "fisher install failed — re-run from fish: fisher update"
+      fi
+    fi
+
+    if [ "$FISH_DEFAULT_OK" = "0" ]; then
+      warn "Default shell NOT switched. After fixing, run:"
+      warn "    echo $FISH_BIN | sudo tee -a /etc/shells"
+      warn "    chsh -s $FISH_BIN"
+    fi
+  else
+    warn "fish not on PATH — confirm 'brew \"fish\"' is in Brewfile and brew bundle ran."
+  fi
+else
+  echo "  No shell/fish/ in dotfiles — skipping."
+fi
 
 # ─── 6. Git config symlinks ────────────────────────────────────────────────
 step "Symlinking git configs..."
@@ -193,9 +270,17 @@ mkdir -p "$HOME/Screenshots"
 # ─── Done ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  Bootstrap complete!${NC}"
+if [ "${BREW_BUNDLE_OK:-1}" = "1" ] && [ "${FISH_DEFAULT_OK:-1}" = "1" ]; then
+  echo -e "${GREEN}  Bootstrap complete!${NC}"
+else
+  echo -e "${YELLOW}  Bootstrap finished WITH WARNINGS${NC}"
+  [ "${BREW_BUNDLE_OK:-1}" = "0" ] && echo -e "${YELLOW}    - brew bundle had failures (re-run after fixing)${NC}"
+  [ "${FISH_DEFAULT_OK:-1}" = "0" ] && echo -e "${YELLOW}    - default shell NOT switched to fish (see warnings above)${NC}"
+fi
 echo -e "${GREEN}═══════════════════════════════════════════════════════════${NC}"
 echo ""
-echo "  Restart your terminal, then complete the manual steps:"
-echo "  See: $DOTFILES_DIR/manual-steps.md"
+echo "  IMPORTANT: fully QUIT your terminal app (⌘Q in Ghostty/Terminal/iTerm)"
+echo "  and reopen — the new login shell is only read at process launch."
+echo ""
+echo "  Then complete: $DOTFILES_DIR/manual-steps.md"
 echo ""
