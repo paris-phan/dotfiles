@@ -14,6 +14,7 @@ brew "starship"        # Cross-shell prompt (initialized in config.fish)
 brew "tree"            # Directory tree visualization
 brew "virtualenv"      # Required by gcloud-cli cask installer
 brew "zoxide"          # Smarter cd (initialized in config.fish)
+brew "direnv"
 
 # --- Cask Apps (installed via Homebrew, self-update after) -------------------
 cask "alt-tab"              # Windows-like alt-tab
