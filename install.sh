@@ -189,6 +189,18 @@ fi
 # ─── 9. App configs ────────────────────────────────────────────────────────
 step "Restoring app configs..."
 
+# Starship prompt (referenced by config.fish)
+if [ -f "$DOTFILES_DIR/shell/starship.toml" ]; then
+  mkdir -p "$HOME/.config"
+  link_file "$DOTFILES_DIR/shell/starship.toml" "$HOME/.config/starship.toml"
+fi
+
+# Ghostty terminal
+if [ -f "$DOTFILES_DIR/shell/ghostty/config" ]; then
+  mkdir -p "$HOME/.config/ghostty"
+  link_file "$DOTFILES_DIR/shell/ghostty/config" "$HOME/.config/ghostty/config"
+fi
+
 # LinearMouse
 if [ -f "$DOTFILES_DIR/config/linearmouse/linearmouse.json" ]; then
   mkdir -p "$HOME/.config/linearmouse"

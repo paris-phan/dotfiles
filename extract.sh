@@ -42,6 +42,19 @@ if [ -d "$HOME/.config/fish" ]; then
   fi
 fi
 
+# Starship prompt
+if [ -f "$HOME/.config/starship.toml" ]; then
+  cp "$HOME/.config/starship.toml" "$DOTFILES_DIR/shell/starship.toml"
+  info "Copied starship.toml"
+fi
+
+# Ghostty terminal
+if [ -f "$HOME/.config/ghostty/config" ]; then
+  mkdir -p "$DOTFILES_DIR/shell/ghostty"
+  cp "$HOME/.config/ghostty/config" "$DOTFILES_DIR/shell/ghostty/config"
+  info "Copied ghostty config"
+fi
+
 # ─── 3. Git configs ─────────────────────────────────────────────────────────
 step "Copying git configs..."
 [ -f "$HOME/.gitconfig" ] && cp "$HOME/.gitconfig" "$DOTFILES_DIR/git/.gitconfig" && info "Copied .gitconfig"

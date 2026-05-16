@@ -54,6 +54,8 @@ claude auth
 
 **Configs**
 - `readlink ~/.config/fish/config.fish` points into `~/Github/dotfiles/shell/fish/`
+- `readlink ~/.config/starship.toml` points into `~/Github/dotfiles/shell/`
+- `readlink ~/.config/ghostty/config` points into `~/Github/dotfiles/shell/ghostty/`
 - `readlink ~/.zshrc` points into `~/Github/dotfiles/shell/`
 
 **Apps**

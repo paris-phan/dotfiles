@@ -66,6 +66,8 @@ dotfiles/
 ├── shell/
 │   ├── .zshrc                      # Zsh config (kept for fallback)
 │   ├── .zprofile                   # Zsh login (brew shellenv)
+│   ├── starship.toml               # Starship prompt config (→ ~/.config/)
+│   ├── ghostty/config              # Ghostty terminal config (→ ~/.config/ghostty/)
 │   └── fish/
 │       ├── config.fish             # Fish rc — starship, zoxide, aliases
 │       ├── fish_plugins            # Fisher plugin list
@@ -96,10 +98,11 @@ dotfiles/
 | Homebrew packages + casks | iCloud sign-in |
 | Zsh config (.zshrc, .zprofile) | Internet accounts |
 | Fish config + fisher plugins + default-shell switch | CLI auth (gh, gcloud, claude) |
-| Git config | App sign-ins |
-| SSH config | Antigravity, Texifier |
-| VS Code settings + extensions | Raycast cloud sync |
-| App configs (linearmouse, gh) | `conda init fish` (one-time) |
+| Starship prompt + Ghostty terminal config | App sign-ins |
+| Git config | Antigravity, Texifier |
+| SSH config | Raycast cloud sync |
+| VS Code settings + extensions | `conda init fish` (one-time) |
+| App configs (linearmouse, gh) | |
 | macOS defaults (dock, finder, etc.) | |
 | LaunchAgents | |
 | Claude Code CLI + config | |
