@@ -17,5 +17,6 @@
     "window.commandCenter": false,
     "claudeCode.preferredLocation": "panel",
     "gitlens.ai.model": "vscode",
-    "gitlens.ai.vscode.model": "copilot:gpt-4.1"
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "workbench.editor.empty.hint": "hidden"
 }

@@ -34,3 +34,7 @@ end
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/parisphan/Downloads/google-cloud-sdk/path.fish.inc' ]; . '/Users/parisphan/Downloads/google-cloud-sdk/path.fish.inc'; end
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/Users/parisphan/.local/bin" $PATH

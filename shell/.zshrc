@@ -98,3 +98,8 @@ zstyle ':completion:*' menu select
 bindkey -e
 bindkey '^[[A' history-search-backward
 bindkey '^[[B' history-search-forward
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/parisphan/.local/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@18/bin:$PATH"
