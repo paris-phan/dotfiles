@@ -18,5 +18,11 @@
     "claudeCode.preferredLocation": "panel",
     "gitlens.ai.model": "vscode",
     "gitlens.ai.vscode.model": "copilot:gpt-4.1",
-    "workbench.editor.empty.hint": "hidden"
+    "workbench.editor.empty.hint": "hidden",
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "file": ".github/commit-message-instructions.md"
+        }
+    ],
+    "chat.titleBar.openInAgentsWindow.enabled": false
 }
