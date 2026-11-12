@@ -1,0 +1,16 @@
+# Work: service CLIs and database tools used across Mavri, GreekCore and Heartbeat.
+# Install with ./install.sh work
+
+tap "infisical/get-cli"
+
+brew "infisical/get-cli/infisical"
+brew "render"
+brew "stripe-cli"
+brew "postgresql@16", link: true  # keg-only; linked so psql is on PATH
+brew "libpq"
+brew "neonctl"   # Heartbeat
+brew "clamav"    # Mavri upload scanning
+brew "ggshield"  # Mavri secret scanning
+
+cask "postico"
+cask "gcloud-cli"

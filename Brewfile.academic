@@ -1,0 +1,9 @@
+# Academic: LaTeX. MacTeX is a multi-gigabyte download.
+# Install with ./install.sh academic
+
+brew "tectonic"
+brew "poppler"
+
+cask "mactex"
+cask "texifier"
+cask "font-latin-modern"

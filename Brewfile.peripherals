@@ -1,0 +1,5 @@
+# Peripherals: drivers and control apps for desk hardware.
+# Install with ./install.sh peripherals
+
+cask "displaylink"
+cask "elgato-camera-hub"

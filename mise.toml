@@ -1,0 +1,60 @@
+# Everything that is not a package: config files, macOS settings, login shell.
+# Packages are installed by Homebrew from the Brewfiles; see install.sh.
+#
+#   mise bootstrap --dry-run   preview
+#   mise bootstrap             apply
+#   mise bootstrap status      show drift
+
+# Whole files are symlinked into this repo, so editing the live file edits the repo.
+[dotfiles]
+"~/.config/fish/config.fish" = { source = "config/fish/config.fish" }
+"~/.config/fish/conf.d/homebrew.fish" = { source = "config/fish/conf.d/homebrew.fish" }
+"~/.config/starship.toml" = { source = "config/starship.toml" }
+"~/.config/ghostty/config" = { source = "config/ghostty/config" }
+"~/.gitconfig" = { source = "config/git/config" }
+"~/.config/git/ignore" = { source = "config/git/ignore" }
+"~/.config/gh/config.yml" = { source = "config/gh/config.yml" }
+"~/.config/linearmouse/linearmouse.json" = { source = "config/linearmouse/linearmouse.json" }
+"~/Library/Application Support/Code/User/settings.json" = { source = "config/vscode/settings.json" }
+"~/Library/Application Support/Code/User/keybindings.json" = { source = "config/vscode/keybindings.json" }
+"~/.orca/keybindings.json" = { source = "config/orca/keybindings.json" }
+
+# These files are also written by the apps themselves (and by Orca's hooks),
+# so only the keys in each source file are owned; everything else is left alone.
+"~/.claude/settings.json/prefs" = { source = "config/claude/settings.json", merge = true }
+"~/.codex/config.toml/prefs" = { source = "config/codex/config.toml", merge = true }
+"~/.omp/agent/config.yml/prefs" = { source = "config/omp/config.yml", merge = true }
+
+[bootstrap.user]
+login_shell = "/opt/homebrew/bin/fish"
+
+[bootstrap.macos.dock]
+tilesize = 46
+show_recents = false
+apps = [
+  "/Applications/Safari.app",
+  "/System/Applications/Messages.app",
+  "/System/Applications/Mail.app",
+]
+
+[bootstrap.macos.finder]
+preferred_view_style = "list"
+
+[bootstrap.macos.keyboard]
+automatic_capitalization = false
+automatic_spelling_correction = false
+
+[bootstrap.macos.defaults]
+"com.apple.WindowManager" = { EnableTiledWindowMargins = false }
+
+# Dark mode
+[[bootstrap.macos.defaults_entries]]
+domain = "NSGlobalDomain"
+key = "AppleInterfaceStyle"
+value = "Dark"
+
+# No full stop on double space
+[[bootstrap.macos.defaults_entries]]
+domain = "NSGlobalDomain"
+key = "NSAutomaticPeriodSubstitutionEnabled"
+value = false

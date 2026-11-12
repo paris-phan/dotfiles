@@ -1,119 +1,128 @@
 # dotfiles
 
-Mac development environment for M4 Mac Mini.
+Sets up a Mac (Apple Silicon) from a clean macOS install: packages, apps, config files, macOS settings and the login shell.
 
-Default shell is **fish** (with [fisher](https://github.com/jorgebucaran/fisher) plugins), prompt is [starship](https://starship.rs/). Zsh config is also captured for fallback.
+- **Homebrew** installs packages and apps from the Brewfiles.
+- **[mise](https://mise.jdx.dev/bootstrap.html)** places config files, applies macOS settings and sets the login shell from `mise.toml`.
+- **`install.sh`** runs both, in order.
 
-## Setup from Scratch
+## Set up a new Mac
 
 ```bash
-# 1. Xcode CLI tools and Homebrew
 xcode-select --install
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# 2. Clone and bootstrap
-brew install git
-git clone <this-repo> ~/Github/dotfiles
-bash ~/Github/dotfiles/install.sh
 ```
-
-`install.sh` will, in order:
-
-1. Install Xcode CLI Tools (skip if present)
-2. Install Homebrew (skip if present)
-3. `brew bundle` — installs everything in `Brewfile` (fish, starship, zoxide, eza, bat, cocoapods, gh, node, postgresql@18, tree, plus all cask apps)
-4. Initialize Conda for the current `$SHELL`
-5. Symlink zsh configs (`.zshrc`, `.zprofile`) into `~`
-6. **Set up fish:** symlink `config.fish`, `fish_plugins`, and any themes; add `/opt/homebrew/bin/fish` to `/etc/shells` (sudo prompt); `chsh -s` to fish; bootstrap fisher and run `fisher update` to install plugins from `fish_plugins`
-7. Symlink git configs
-8. Create `~/.ssh`, symlink ssh config
-9. Symlink VS Code settings + keybindings + snippets, install extensions from `extensions.txt`
-10. Symlink LinearMouse, gh CLI, and Claude Code configs
-11. Copy LaunchAgents into `~/Library/LaunchAgents` and `launchctl load` them
-12. Apply macOS system defaults (`defaults.sh`)
-13. Install Claude Code CLI
-14. Generate ed25519 SSH key (interactive — prompts for email)
-15. Restore Conda environments from `conda/*.yml`
-
-When it finishes, **open a new terminal** so the shell change takes effect, then complete the steps in [manual-steps.md](manual-steps.md).
-
-## Keeping Machines in Sync
 
 ```bash
-# After changing anything on this machine:
-cd ~/Github/dotfiles
-bash extract.sh          # captures current state into the repo
-git add -A && git commit -m "update" && git push
-
-# On the other machine:
-cd ~/Github/dotfiles && git pull
-brew bundle --file=Brewfile   # if Brewfile changed
-fisher update                  # if fish_plugins changed (run from fish)
+git clone https://github.com/paris-phan/dotfiles.git ~/Github/personal/dotfiles
 ```
 
-`extract.sh` captures: Brewfile (as `Brewfile.generated` for review), zsh configs, **fish `config.fish` + `fish_plugins` + `themes/`** (plugin-managed files in `functions/`/`completions/`/`conf.d/` are intentionally skipped — fisher rebuilds them), git configs, ssh config, VS Code settings + extensions list, LinearMouse + gh + Claude Code configs, user LaunchAgents, and Conda environments.
-
-## Structure
-
-```
-dotfiles/
-├── Brewfile                        # Homebrew formulae and casks
-├── install.sh                      # Bootstrap a fresh Mac
-├── extract.sh                      # Capture current Mac state
-├── defaults.sh                     # macOS system preferences
-├── manual-steps.md                 # Post-bootstrap checklist
-├── shell/
-│   ├── .zshrc                      # Zsh config (kept for fallback)
-│   ├── .zprofile                   # Zsh login (brew shellenv)
-│   ├── starship.toml               # Starship prompt config (→ ~/.config/)
-│   ├── ghostty/config              # Ghostty terminal config (→ ~/.config/ghostty/)
-│   └── fish/
-│       ├── config.fish             # Fish rc — starship, zoxide, aliases
-│       ├── fish_plugins            # Fisher plugin list
-│       └── themes/                 # Custom fish themes (if any)
-├── git/
-│   ├── .gitconfig                  # Git user + LFS
-│   └── .gitignore_global           # System-wide gitignore
-├── ssh/
-│   └── config                      # SSH host shortcuts (no keys)
-├── vscode/
-│   ├── settings.json               # Editor settings
-│   ├── keybindings.json            # Custom keybindings
-│   └── extensions.txt              # Extension IDs
-├── config/
-│   ├── linearmouse/linearmouse.json # Mouse config (Razer Viper V2 Pro)
-│   ├── gh/config.yml               # GitHub CLI preferences
-│   └── claude.json                 # Claude Code config (sanitized)
-├── launchagents/
-│   └── com.lwouis.alt-tab-macos.plist
-└── conda/
-    └── *.yml                       # Exported conda environments
+```bash
+cd ~/Github/personal/dotfiles && ./install.sh work mobile academic peripherals
 ```
 
-## What's Automated vs Manual
+Leave out any group you don't want; `./install.sh` alone installs the core only. The script is safe to re-run.
 
-| Automated by install.sh | Manual (see manual-steps.md) |
+If a config file already exists as a real file, `mise bootstrap` stops and lists it rather than overwriting. Re-run with `./install.sh --force-dotfiles` to replace it.
+
+Then log out and back in, and work through the [checklist](#checklist).
+
+## What's in here
+
+| Path | What |
 |---|---|
-| Homebrew packages + casks | iCloud sign-in |
-| Zsh config (.zshrc, .zprofile) | Internet accounts |
-| Fish config + fisher plugins + default-shell switch | CLI auth (gh, gcloud, claude) |
-| Starship prompt + Ghostty terminal config | App sign-ins |
-| Git config | Antigravity, Texifier |
-| SSH config | Raycast cloud sync |
-| VS Code settings + extensions | `conda init fish` (one-time) |
-| App configs (linearmouse, gh) | |
-| macOS defaults (dock, finder, etc.) | |
-| LaunchAgents | |
-| Claude Code CLI + config | |
-| Conda environments | |
+| `install.sh` | Xcode Command Line Tools, Homebrew, Brewfiles, then `mise bootstrap` |
+| `Brewfile` | Core: shell and CLI tools, apps, agent CLIs, VS Code extensions |
+| `Brewfile.work` | Service CLIs and database tools (Infisical, Render, Stripe, Postgres, gcloud) |
+| `Brewfile.mobile` | iOS and Android tooling |
+| `Brewfile.academic` | LaTeX (MacTeX, Tectonic, Texifier) |
+| `Brewfile.peripherals` | DisplayLink, Elgato Camera Hub |
+| `mise.toml` | Config file links, macOS settings, login shell |
+| `config/` | The config files themselves |
 
-## Not Captured (by design)
+### Config files
 
-- SSH private keys (generated fresh per machine)
-- Auth tokens (gh, gcloud, Claude, Raycast)
-- Keychain data (syncs via iCloud)
-- macOS notification preferences
-- TCC/Privacy permissions (granted per-app on first use)
-- Fish `fish_history` and `fish_variables` (machine-local state)
-- Fish `functions/`, `completions/`, `conf.d/` content (rebuilt by `fisher update` from `fish_plugins`)
+Symlinked whole, so editing the live file edits this repo:
+
+| Live path | Source |
+|---|---|
+| `~/.config/fish/config.fish` | `config/fish/config.fish` |
+| `~/.config/fish/conf.d/homebrew.fish` | `config/fish/conf.d/homebrew.fish` |
+| `~/.config/starship.toml` | `config/starship.toml` |
+| `~/.config/ghostty/config` | `config/ghostty/config` |
+| `~/.gitconfig` | `config/git/config` |
+| `~/.config/git/ignore` | `config/git/ignore` |
+| `~/.config/gh/config.yml` | `config/gh/config.yml` |
+| `~/.config/linearmouse/linearmouse.json` | `config/linearmouse/linearmouse.json` |
+| VS Code `settings.json`, `keybindings.json` | `config/vscode/` |
+| `~/.orca/keybindings.json` | `config/orca/keybindings.json` |
+
+Merged by key, because the apps (and Orca's hooks) write to the same files. Only the keys in the source are owned:
+
+| Live path | Source |
+|---|---|
+| `~/.claude/settings.json` | `config/claude/settings.json` |
+| `~/.codex/config.toml` | `config/codex/config.toml` |
+| `~/.omp/agent/config.yml` | `config/omp/config.yml` |
+
+### macOS settings
+
+Dark mode; Dock size 46 with recents off and Safari, Messages and Mail pinned; Finder list view; autocorrect, auto-capitalisation and the double-space full stop off; tiled window margins off.
+
+## Day to day
+
+Add a package: install it, then add the line to the right Brewfile.
+
+```bash
+brew bundle check --file Brewfile --verbose
+```
+
+```bash
+brew bundle cleanup --file Brewfile
+```
+
+`check` lists what the Brewfile wants but is missing. `cleanup` lists what is installed but undeclared; it only removes anything with `--force`, and it compares against one Brewfile at a time, so packages from the group files show up as undeclared.
+
+Config drift and re-applying:
+
+```bash
+mise bootstrap status
+```
+
+```bash
+mise bootstrap --dry-run
+```
+
+An app that rewrites its own config can replace a symlink with a real file; `status` shows it as differing.
+
+## Checklist
+
+Manual steps after `install.sh`.
+
+### Sign in
+
+1. `gh auth login`
+2. `infisical login`
+3. `gcloud auth login`
+4. `render login`
+5. `neonctl auth`
+6. `stripe login`
+7. `claude` and `codex` (each prompts on first run)
+8. Apps: Chrome, Claude, ChatGPT, Linear, Notion, Notion Calendar, Figma, Spotify, Tailscale, Raycast, OrbStack
+
+### Install by hand
+
+- **Orca**: not in Homebrew. It reinstalls its own agent hooks, skills and status line on first launch.
+- **omp**: not in Homebrew. Its settings are already in place from `config/omp/config.yml`.
+
+### Restore app settings
+
+- **Raycast**: export settings on the old Mac, import on the new one.
+- **BetterDisplay** and **Thaw**: set up again by hand.
+
+## Not in this repo
+
+- Credentials and tokens of any kind. Sign in again on each machine.
+- Agent history, sessions and memory (`~/.claude`, `~/.codex`, `~/.omp`).
+- Files generated by Orca.
+- App Store apps.
+- Project repositories.

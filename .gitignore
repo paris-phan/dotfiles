@@ -1,10 +1,10 @@
-# Sensitive files
+# Credentials must never land here
 **/hosts.yml
-**/credentials
-**/.credentials
+**/credentials*
+**/.credentials*
+**/auth.json
+*.env
 
-# Generated / ephemeral
-*.backup.*
-Brewfile.generated
-Brewfile.lock.json
+# Generated
+Brewfile*.lock.json
 .DS_Store

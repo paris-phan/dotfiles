@@ -1,0 +1,30 @@
+modelRoles:
+  default: anthropic/claude-opus-5-5:high
+symbolPreset: nerd
+composer:
+  shape: pi
+theme:
+  dark: titanium
+  light: light
+defaultThinkingLevel: xhigh
+hideThinkingBlock: false
+externalThinking: false
+steeringMode: one-at-a-time
+plan:
+  defaultOnStartup: false
+statusLine:
+  transparent: false
+display:
+  showTokenUsage: true
+  showTurnTime: true
+  hideToolActivity: true
+tier:
+  openai: priority
+memory:
+  backend: "off"
+github:
+  enabled: true
+extendedContext: false
+providers:
+  anthropic:
+    slowMode: auto

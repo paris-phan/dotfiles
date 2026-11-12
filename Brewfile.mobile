@@ -1,0 +1,14 @@
+# Mobile: iOS and Android development. Xcode itself comes from the App Store.
+# Install with ./install.sh mobile
+
+tap "meta/fb"
+
+brew "watchman"
+brew "cocoapods"
+brew "fastlane"
+brew "meta/fb/idb-companion"
+
+cask "android-studio"
+cask "android-commandlinetools"
+
+uv "fb-idb"

@@ -1,38 +1,74 @@
-# =============================================================================
-# Brewfile — Homebrew packages, casks, and fonts
-# =============================================================================
+# Core: installed on every machine by ./install.sh
+# Opt-in groups live in Brewfile.<group>.
 
-# --- CLI Tools ---------------------------------------------------------------
-brew "bat"             # Better cat (used by alias in config.fish)
-brew "cocoapods"       # Dependency manager for Cocoa projects
-brew "eza"             # Modern ls (used by aliases in config.fish)
-brew "fish"            # Friendly interactive shell (default login shell)
-brew "gh"              # GitHub command-line tool
-brew "node"            # JavaScript runtime
-brew "postgresql@18"   # Object-relational database
-brew "starship"        # Cross-shell prompt (initialized in config.fish)
-brew "tree"            # Directory tree visualization
-brew "virtualenv"      # Required by gcloud-cli cask installer
-brew "zoxide"          # Smarter cd (initialized in config.fish)
-brew "direnv"
+# Shell and CLI
+brew "fish"
+brew "starship"
+brew "eza"
+brew "fd"
+brew "ripgrep"
+brew "tree"
+brew "git"
+brew "gh"
+brew "micro"
+brew "neovim"
+brew "mise"
+brew "uv"
+brew "ffmpeg"
 
-# --- Cask Apps (installed via Homebrew, self-update after) -------------------
-cask "alt-tab"              # Windows-like alt-tab
-cask "appcleaner"           # Application uninstaller
-cask "jordanbaird-ice"      # Menu bar manager
-cask "betterdisplay"        # Display management
-cask "claude"               # Claude desktop app
-cask "figma"                # Design tool
-cask "gcloud-cli"           # Google Cloud SDK
-cask "github"               # GitHub Desktop
-cask "google-chrome"        # Browser
-cask "grandperspective"     # Disk usage visualization
-cask "linear"               # Project management
-cask "linearmouse"          # Mouse customization
-cask "miniconda"            # Python environment manager
-cask "notion"               # Notes & docs
-cask "notion-calendar"      # Calendar
-cask "raycast"              # Launcher
-cask "slack"                # Communication
-cask "spotify"              # Music
-cask "visual-studio-code"   # Code editor
+# Terminal, launcher and system utilities
+cask "ghostty@tip"
+cask "raycast"
+cask "orbstack"
+cask "linearmouse"
+cask "betterdisplay"
+cask "thaw"
+cask "pearcleaner"
+cask "macs-fan-control"
+cask "font-jetbrains-mono-nerd-font"
+
+# Apps
+cask "visual-studio-code"
+cask "google-chrome"
+cask "claude"
+cask "chatgpt"
+cask "linear-linear"
+cask "notion"
+cask "notion-calendar"
+cask "figma"
+cask "tailscale-app"
+cask "spotify"
+
+# Agent CLIs
+cask "claude-code"
+cask "codex"
+
+# VS Code extensions
+vscode "anthropic.claude-code"
+vscode "bierner.markdown-mermaid"
+vscode "eamodio.gitlens"
+vscode "esbenp.prettier-vscode"
+vscode "mateocerquetella.xcode-12-theme"
+vscode "mechatroner.rainbow-csv"
+vscode "ms-azuretools.vscode-containers"
+vscode "ms-azuretools.vscode-docker"
+vscode "ms-python.debugpy"
+vscode "ms-python.python"
+vscode "ms-python.vscode-pylance"
+vscode "ms-python.vscode-python-envs"
+vscode "ms-toolsai.jupyter"
+vscode "ms-toolsai.jupyter-keymap"
+vscode "ms-toolsai.jupyter-renderers"
+vscode "ms-toolsai.vscode-jupyter-cell-tags"
+vscode "ms-toolsai.vscode-jupyter-slideshow"
+vscode "ms-vscode-remote.remote-containers"
+vscode "ms-vscode-remote.remote-ssh"
+vscode "ms-vscode-remote.remote-ssh-edit"
+vscode "ms-vscode.cpptools"
+vscode "ms-vscode.remote-explorer"
+vscode "oderwat.indent-rainbow"
+vscode "tailscale.vscode-tailscale"
+vscode "tamasfe.even-better-toml"
+vscode "tomoki1207.pdf"
+vscode "unifiedjs.vscode-mdx"
+vscode "xyc.vscode-mdx-preview"

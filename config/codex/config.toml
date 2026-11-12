@@ -1,0 +1,12 @@
+model = "gpt-6-astra"
+model_reasoning_effort = "low"
+service_tier = "priority"
+
+[desktop]
+conversationDetailMode = "STEPS_PROSE"
+followUpQueueMode = "steer"
+git-branch-prefix = "paris/"
+mac-menu-bar-enabled = false
+avatar-overlay-mascot-width-px = 80
+avatar-overlay-pet-visible = true
+selected-avatar-id = "bsod"
